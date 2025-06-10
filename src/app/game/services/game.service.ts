@@ -194,7 +194,7 @@ export class GameService {
     this.playerMovements();
     this.shootGestion();
     this.bulletMovement();
-    //this.enemiesMovement();
+    this.enemiesMovement();
     this.checkCollisions();
     this.gestionExplosions(deltaTime);
     if (this.enemies.length == 0) {
