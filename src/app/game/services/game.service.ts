@@ -3,13 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Enemy, enemyTypes } from '../models/enemy.model';
 import { Explosion } from '../models/explosion.model';
 import { Bullet, Entity, SpaceShip } from '../models/entity.model';
-
-const backgrounds = {
-  stage1: 'assets/space/background/1.png',
-  stage2: 'assets/space/background/2.png',
-  stage3: 'assets/space/background/3.png',
-  stage4: 'assets/space/background/4.png',
-};
+import { backgrounds } from '../constants/backgrounds.const';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -85,6 +79,8 @@ export class GameService {
       hp: 100,
       maxHp: 100,
       speed: 5,
+      experience: 0,
+      level: 1,
       image: loadImage('assets/space/player.png'),
     };
 
@@ -114,6 +110,7 @@ export class GameService {
       const enemyImage = new Image();
       enemyImage.src = type.image;
 
+      console.log(Math.round((this.wave - 1) / 10));
       enemies.push({
         x: Math.random() * (this.canvas.width - 40),
         y: Math.random() * 100,
@@ -121,10 +118,12 @@ export class GameService {
         height: 30,
         image: enemyImage,
         type: type.type,
-        hp: type.hp + (this.wave - 1) * 2,
-        maxHp: type.hp + (this.wave - 1) * 2,
+        hp: type.hp + Math.round((this.wave - 1) / 10) * 2,
+        maxHp: type.hp + Math.round((this.wave - 1) / 10) * 2,
         speed: type.speed,
         canShoot: type.canShoot,
+        experience: type.experience,
+        level: Math.round((this.wave - 1) / 10) + 1,
         shootCooldown: 1000 + Math.random() * 1000,
         lastShotTime: 0,
       });
@@ -199,7 +198,6 @@ export class GameService {
     this.gestionExplosions(deltaTime);
     if (this.enemies.length == 0) {
       this.wave += 1;
-      console.log(this.wave);
       this.enemies = this.spawnWave();
     }
     if (this.wave >= 10 && this.wave < 20) this.updateScene('2');
@@ -302,6 +300,8 @@ export class GameService {
       frameTimer: 0,
       frameInterval: 100,
     });
+
+    this.player.experience += enemy.experience;
   }
 
   private draw() {

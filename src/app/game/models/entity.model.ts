@@ -10,6 +10,8 @@ export interface SpaceShip extends Entity {
   hp: number;
   maxHp: number;
   speed: number;
+  experience: number;
+  level: number;
 }
 
 export interface Bullet extends Entity {
