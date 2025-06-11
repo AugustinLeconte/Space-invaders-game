@@ -5,6 +5,9 @@ import { Explosion } from '../models/explosion.model';
 import { Bullet, Entity, Player, SpaceShip } from '../models/entity.model';
 import { backgrounds } from '../constants/backgrounds.const';
 import { WaveService } from './wave.service';
+import { ImageService } from './image.service';
+import { XpService } from './xp.service';
+import { PlayerService } from './player.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -34,7 +37,12 @@ export class GameService {
   private keyLockP = false;
   private keyLockShoot = false;
 
-  constructor(private waveService: WaveService) {}
+  constructor(
+    private waveService: WaveService,
+    private imageService: ImageService,
+    private xpService: XpService,
+    private playerService: PlayerService
+  ) {}
 
   loadBackground(imagePath: string) {
     const img = new Image();
@@ -61,14 +69,7 @@ export class GameService {
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
 
-    const loadImage = (src: string) => {
-      const img = new Image();
-      img.src = src;
-      return img;
-    };
-
-    const playerImage = new Image();
-    playerImage.src = 'assets/space/player.png';
+    const playerImage = this.imageService.loadImage('assets/space/player.png');
     playerImage.onload = () => {
       this.ctx.drawImage(playerImage, 100, 100, 40, 30);
     };
@@ -84,28 +85,27 @@ export class GameService {
       experience: 0,
       level: 1,
       xp: 0,
-      xpToNextLevel: this.calculateXpForLevel(2),
-      image: loadImage('assets/space/player.png'),
+      xpToNextLevel: this.xpService.calculateXpForLevel(2),
+      image: this.imageService.loadImage('assets/space/player.png'),
     };
 
-    this.bulletImage = new Image();
-    this.bulletImage.src = 'assets/space/bullet.png';
+    this.playerService.initPlayer(this.player);
 
-    this.explosionSprite = new Image();
-    this.explosionSprite.src = 'assets/space/explosion.png';
+    this.bulletImage = this.imageService.loadImage('assets/space/bullet.png');
 
-    this.enemyBulletImage = new Image();
-    this.enemyBulletImage.src = 'assets/space/enemyBullet.png';
+    this.explosionSprite = this.imageService.loadImage(
+      'assets/space/explosion.png'
+    );
+
+    this.enemyBulletImage = this.imageService.loadImage(
+      'assets/space/enemyBullet.png'
+    );
 
     window.addEventListener('keydown', (e) => (this.keys[e.key] = true));
     window.addEventListener('keyup', (e) => (this.keys[e.key] = false));
 
     this.updateScene('1');
     this.gameLoop();
-  }
-
-  calculateXpForLevel(level: number): number {
-    return Math.floor(100 * Math.pow(1.2, level - 1));
   }
 
   private gameLoop = (now: number = performance.now()) => {
@@ -289,7 +289,7 @@ export class GameService {
       frameInterval: 100,
     });
 
-    this.gainXp(enemy.experience);
+    this.xpService.gainXp(enemy.experience);
   }
 
   private draw() {
@@ -403,24 +403,5 @@ export class GameService {
   private resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
-  }
-
-  gainXp(amount: number): void {
-    this.player.xp += amount;
-
-    while (this.player.xp >= this.player.xpToNextLevel) {
-      this.player.xp -= this.player.xpToNextLevel;
-      this.player.level++;
-      this.player.xpToNextLevel = this.calculateXpForLevel(
-        this.player.level + 1
-      );
-      this.onLevelUp(); // Effet visuel, bonus, etc.
-    }
-  }
-
-  onLevelUp(): void {
-    console.log('Level up ! Now level ' + this.player.level);
-    this.player.maxHp += 20;
-    this.player.hp = this.player.maxHp;
   }
 }

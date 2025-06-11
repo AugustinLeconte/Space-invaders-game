@@ -3,10 +3,11 @@ import { GameService } from './services/game.service';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { WaveComponent } from './components/wave/wave.component';
+import { XpComponent } from './components/xp/xp.component';
 
 @Component({
   selector: 'app-game',
-  imports: [CommonModule, WaveComponent],
+  imports: [CommonModule, WaveComponent, XpComponent],
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
