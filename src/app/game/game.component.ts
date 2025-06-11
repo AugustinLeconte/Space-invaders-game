@@ -2,10 +2,11 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { GameService } from './services/game.service';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { WaveComponent } from './components/wave/wave.component';
 
 @Component({
   selector: 'app-game',
-  imports: [CommonModule],
+  imports: [CommonModule, WaveComponent],
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })

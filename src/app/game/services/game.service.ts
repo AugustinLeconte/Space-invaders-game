@@ -4,6 +4,7 @@ import { Enemy, enemyTypes } from '../models/enemy.model';
 import { Explosion } from '../models/explosion.model';
 import { Bullet, Entity, Player, SpaceShip } from '../models/entity.model';
 import { backgrounds } from '../constants/backgrounds.const';
+import { WaveService } from './wave.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -32,7 +33,8 @@ export class GameService {
   gamePaused$ = this.gamePaused.asObservable();
   private keyLockP = false;
   private keyLockShoot = false;
-  private wave = 0;
+
+  constructor(private waveService: WaveService) {}
 
   loadBackground(imagePath: string) {
     const img = new Image();
@@ -106,37 +108,6 @@ export class GameService {
     return Math.floor(100 * Math.pow(1.2, level - 1));
   }
 
-  spawnWave() {
-    const enemies: Enemy[] = [];
-
-    const typeCount = Math.min(this.wave, enemyTypes.length);
-
-    for (let i = 0; i < typeCount * 3; i++) {
-      const type = enemyTypes[i % typeCount];
-      const enemyImage = new Image();
-      enemyImage.src = type.image;
-
-      console.log(Math.round((this.wave - 1) / 10));
-      enemies.push({
-        x: Math.random() * (this.canvas.width - 40),
-        y: Math.random() * 100,
-        width: 40,
-        height: 30,
-        image: enemyImage,
-        type: type.type,
-        hp: type.hp + Math.round((this.wave - 1) / 10) * 2,
-        maxHp: type.hp + Math.round((this.wave - 1) / 10) * 2,
-        speed: type.speed,
-        canShoot: type.canShoot,
-        experience: type.experience,
-        shootCooldown: 1000 + Math.random() * 1000,
-        lastShotTime: 0,
-      });
-    }
-
-    return enemies;
-  }
-
   private gameLoop = (now: number = performance.now()) => {
     const deltaTime = now - this.lastFrameTime;
     this.lastFrameTime = now;
@@ -202,12 +173,24 @@ export class GameService {
     this.checkCollisions();
     this.gestionExplosions(deltaTime);
     if (this.enemies.length == 0) {
-      this.wave += 1;
-      this.enemies = this.spawnWave();
+      this.waveService.nextWave();
+      this.enemies = this.waveService.spawnWave(this.canvas.width);
     }
-    if (this.wave >= 10 && this.wave < 20) this.updateScene('2');
-    if (this.wave >= 20 && this.wave < 30) this.updateScene('3');
-    if (this.wave >= 30 && this.wave < 40) this.updateScene('4');
+    if (
+      this.waveService.getNumberWave() >= 10 &&
+      this.waveService.getNumberWave() < 20
+    )
+      this.updateScene('2');
+    if (
+      this.waveService.getNumberWave() >= 20 &&
+      this.waveService.getNumberWave() < 30
+    )
+      this.updateScene('3');
+    if (
+      this.waveService.getNumberWave() >= 30 &&
+      this.waveService.getNumberWave() < 40
+    )
+      this.updateScene('4');
   }
 
   private gestionExplosions(deltaTime: number) {
