@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Enemy, enemyTypes } from '../models/enemy.model';
 import { Explosion } from '../models/explosion.model';
-import { Bullet, Entity, SpaceShip } from '../models/entity.model';
+import { Bullet, Entity, Player, SpaceShip } from '../models/entity.model';
 import { backgrounds } from '../constants/backgrounds.const';
 
 @Injectable({ providedIn: 'root' })
@@ -22,7 +22,7 @@ export class GameService {
   private explosions: Explosion[] = [];
   private lastFrameTime = performance.now();
 
-  private player!: SpaceShip;
+  private player!: Player;
   private bullets: Bullet[] = [];
   private enemyBullets: Bullet[] = [];
   private enemies: Enemy[] = [];
@@ -81,6 +81,8 @@ export class GameService {
       speed: 5,
       experience: 0,
       level: 1,
+      xp: 0,
+      xpToNextLevel: this.calculateXpForLevel(2),
       image: loadImage('assets/space/player.png'),
     };
 
@@ -98,6 +100,10 @@ export class GameService {
 
     this.updateScene('1');
     this.gameLoop();
+  }
+
+  calculateXpForLevel(level: number): number {
+    return Math.floor(100 * Math.pow(1.2, level - 1));
   }
 
   spawnWave() {
@@ -123,7 +129,6 @@ export class GameService {
         speed: type.speed,
         canShoot: type.canShoot,
         experience: type.experience,
-        level: Math.round((this.wave - 1) / 10) + 1,
         shootCooldown: 1000 + Math.random() * 1000,
         lastShotTime: 0,
       });
@@ -301,7 +306,7 @@ export class GameService {
       frameInterval: 100,
     });
 
-    this.player.experience += enemy.experience;
+    this.gainXp(enemy.experience);
   }
 
   private draw() {
@@ -370,17 +375,17 @@ export class GameService {
     );
 
     this.explosions.forEach((e) => {
-      const col = e.frame; // toutes les frames sont en ligne
+      const col = e.frame;
       this.ctx.drawImage(
         e.sprite,
-        col * e.frameWidth, // source X
-        0, // source Y
-        e.frameWidth, // source largeur
-        e.frameHeight, // source hauteur
-        e.x, // destination X
-        e.y, // destination Y
-        e.frameWidth, // destination largeur
-        e.frameHeight // destination hauteur
+        col * e.frameWidth,
+        0,
+        e.frameWidth,
+        e.frameHeight,
+        e.x,
+        e.y,
+        e.frameWidth,
+        e.frameHeight
       );
     });
 
@@ -415,5 +420,24 @@ export class GameService {
   private resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+  }
+
+  gainXp(amount: number): void {
+    this.player.xp += amount;
+
+    while (this.player.xp >= this.player.xpToNextLevel) {
+      this.player.xp -= this.player.xpToNextLevel;
+      this.player.level++;
+      this.player.xpToNextLevel = this.calculateXpForLevel(
+        this.player.level + 1
+      );
+      this.onLevelUp(); // Effet visuel, bonus, etc.
+    }
+  }
+
+  onLevelUp(): void {
+    console.log('Level up ! Now level ' + this.player.level);
+    this.player.maxHp += 20;
+    this.player.hp = this.player.maxHp;
   }
 }
