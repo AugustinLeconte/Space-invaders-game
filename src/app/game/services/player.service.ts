@@ -39,4 +39,12 @@ export class PlayerService {
   public setXpToNextLevel(newXpToNextLevel: number): void {
     this.updatePlayer((p) => ({ ...p, xpToNextLevel: newXpToNextLevel }));
   }
+
+  public setPlayerPositionX(pos: number): void {
+    this.updatePlayer((p) => ({ ...p, x: p.x + pos }));
+  }
+
+  public setPlayerPositionY(pos: number): void {
+    this.updatePlayer((p) => ({ ...p, y: p.y + pos }));
+  }
 }
