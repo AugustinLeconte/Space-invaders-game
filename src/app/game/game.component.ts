@@ -1,9 +1,10 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { GameService } from './services/game.service';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { WaveComponent } from './components/wave/wave.component';
 import { XpComponent } from './components/xp/xp.component';
+import { GameStateService } from './services/gameState.service';
+import { GameService } from './services/game.service';
 
 @Component({
   selector: 'app-game',
@@ -17,10 +18,13 @@ export class GameComponent implements AfterViewInit {
   private gamePausedSubscription!: Subscription;
   isPaused!: boolean;
 
-  constructor(public gameService: GameService) {}
+  constructor(
+    public gameStateService: GameStateService,
+    public gameService: GameService
+  ) {}
 
   ngOnInit(): void {
-    this.gamePausedSubscription = this.gameService.gamePaused$.subscribe(
+    this.gamePausedSubscription = this.gameStateService.gamePaused$.subscribe(
       (paused) => {
         this.isPaused = paused;
       }

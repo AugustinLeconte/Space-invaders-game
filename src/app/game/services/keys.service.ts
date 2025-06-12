@@ -3,6 +3,7 @@ import { PlayerService } from './player.service';
 import { CanvasService } from './canvas.service';
 import { ImageService } from './image.service';
 import { BulletsService } from './bullets.service';
+import { GameStateService } from './gameState.service';
 
 @Injectable({ providedIn: 'root' })
 export class KeysService {
@@ -14,7 +15,8 @@ export class KeysService {
     private playerService: PlayerService,
     private canvasService: CanvasService,
     private imageService: ImageService,
-    private bulletService: BulletsService
+    private bulletService: BulletsService,
+    private gameStateService: GameStateService
   ) {}
 
   public initKeys() {
@@ -22,7 +24,12 @@ export class KeysService {
     window.addEventListener('keyup', (e) => (this.keys[e.key] = false));
   }
 
-  public playerMovements() {
+  public keyGestion() {
+    this.playerMovements();
+    this.shootGestion();
+  }
+
+  private playerMovements() {
     const player = this.playerService.getPlayer();
     if (this.keys['ArrowLeft'] && player.x - 5 >= 0)
       this.playerService.setPlayerPositionX(-5);
@@ -40,7 +47,7 @@ export class KeysService {
       this.playerService.setPlayerPositionY(5);
   }
 
-  public shootGestion() {
+  private shootGestion() {
     const player = this.playerService.getPlayer();
     if (this.keys[' ']) {
       if (!this.keyLockShoot) {
@@ -57,6 +64,17 @@ export class KeysService {
       }
     } else {
       this.keyLockShoot = false;
+    }
+  }
+
+  public pauseGestion() {
+    if (this.keys['p']) {
+      if (!this.keyLockP) {
+        this.gameStateService.paused();
+        this.keyLockP = true;
+      }
+    } else {
+      this.keyLockP = false;
     }
   }
 }

@@ -11,6 +11,7 @@ import { CanvasService } from './canvas.service';
 import { EnemyService } from './enemy.service';
 import { ExplosionService } from './explosions.service';
 import { BackgroundService } from './background.service';
+import { GameStateService } from './gameState.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -18,11 +19,6 @@ export class GameService {
 
   private playerSubscription!: Subscription;
   private player!: Player;
-
-  private keys: Record<string, boolean> = {};
-  private gamePaused = new BehaviorSubject<boolean>(false);
-  gamePaused$ = this.gamePaused.asObservable();
-  private keyLockP = false;
 
   constructor(
     private waveService: WaveService,
@@ -34,7 +30,8 @@ export class GameService {
     private canvasService: CanvasService,
     private enemyService: EnemyService,
     private explosionService: ExplosionService,
-    private backgroundService: BackgroundService
+    private backgroundService: BackgroundService,
+    private gameStateService: GameStateService
   ) {}
 
   init(canvas: HTMLCanvasElement) {
@@ -68,28 +65,16 @@ export class GameService {
     const deltaTime = now - this.lastFrameTime;
     this.lastFrameTime = now;
 
-    if (this.gamePaused.value == false && this.player.hp > 0) {
+    if (!this.gameStateService.isPaused() && this.player.hp > 0) {
       this.update(deltaTime);
       this.canvasService.draw();
     }
-    this.pauseGestion();
+    this.keyService.pauseGestion();
     requestAnimationFrame(this.gameLoop);
   };
 
-  private pauseGestion() {
-    if (this.keys['p']) {
-      if (!this.keyLockP) {
-        this.gamePaused.next(!this.gamePaused.value);
-        this.keyLockP = true;
-      }
-    } else {
-      this.keyLockP = false;
-    }
-  }
-
   private update(deltaTime: number) {
-    this.keyService.playerMovements();
-    this.keyService.shootGestion();
+    this.keyService.keyGestion();
     this.enemyService.shoots();
     this.bulletService.bulletMovement();
     this.enemyService.movement(this.canvasService.canvas.height);
