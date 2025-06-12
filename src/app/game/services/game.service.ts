@@ -48,7 +48,7 @@ export class GameService {
       xp: 0,
       xpToNextLevel: this.xpService.calculateXpForLevel(2),
       image: this.imageService.loadImage('assets/space/player.png'),
-      shield: 100,
+      shield: 3,
     });
     this.canvasService.initCanvas(canvas);
     this.keyService.initKeys();
@@ -81,15 +81,7 @@ export class GameService {
     this.enemyService.movement(this.canvasService.canvas.height);
     this.checkCollisions();
     this.explosionService.gestionExplosions(deltaTime);
-    if (this.enemyService.isEmpty()) {
-      this.waveService.nextWave();
-      this.enemyService.addEnemies(
-        this.waveService.spawnWave(this.canvasService.canvas.width)
-      );
-    }
-    this.backgroundService.changeBackgroundFromWave(
-      this.waveService.getNumberWave()
-    );
+    if (this.enemyService.isEmpty()) this.waveService.nextWave();
   }
 
   private checkCollisions() {

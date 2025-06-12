@@ -6,6 +6,7 @@ import { CanvasService } from './canvas.service';
 import { PlayerService } from './player.service';
 import { ExplosionService } from './explosions.service';
 import { XpService } from './xp.service';
+import { PowerUpService } from './powerUps.service';
 
 @Injectable({ providedIn: 'root' })
 export class EnemyService {
@@ -16,7 +17,8 @@ export class EnemyService {
     private imageService: ImageService,
     private playerService: PlayerService,
     private explosionService: ExplosionService,
-    private xpService: XpService
+    private xpService: XpService,
+    private powerUpService: PowerUpService
   ) {}
 
   public isEmpty() {
@@ -76,6 +78,8 @@ export class EnemyService {
     });
 
     this.xpService.gainXp(enemy.experience);
+
+    this.powerUpService.trySpawnPowerUp(enemy.x, enemy.y);
   }
 
   public takeDamage(index: number, damage: number): void {

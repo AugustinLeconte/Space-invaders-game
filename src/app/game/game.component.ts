@@ -5,10 +5,11 @@ import { WaveComponent } from './components/wave/wave.component';
 import { XpComponent } from './components/xp/xp.component';
 import { GameStateService } from './services/gameState.service';
 import { GameService } from './services/game.service';
+import { PowerUpsComponent } from './components/power-ups/power-ups.component';
 
 @Component({
   selector: 'app-game',
-  imports: [CommonModule, WaveComponent, XpComponent],
+  imports: [CommonModule, WaveComponent, XpComponent, PowerUpsComponent],
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })

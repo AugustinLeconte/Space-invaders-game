@@ -2,13 +2,21 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Enemy, enemyTypes } from '../models/enemy.model';
 import { ImageService } from './image.service';
+import { EnemyService } from './enemy.service';
+import { CanvasService } from './canvas.service';
+import { BackgroundService } from './background.service';
 
 @Injectable({ providedIn: 'root' })
 export class WaveService {
   private wave = new BehaviorSubject<number>(0);
   wave$ = this.wave.asObservable();
 
-  constructor(private imageService: ImageService) {}
+  constructor(
+    private imageService: ImageService,
+    private enemyService: EnemyService,
+    private canvasService: CanvasService,
+    private backgroundService: BackgroundService
+  ) {}
 
   spawnWave(canvasWidth: number) {
     const enemies: Enemy[] = [];
@@ -65,9 +73,9 @@ export class WaveService {
 
   nextWave(): void {
     this.wave.next(this.wave.value + 1);
-  }
-
-  getNumberWave(): number {
-    return this.wave.value;
+    this.enemyService.addEnemies(
+      this.spawnWave(this.canvasService.canvas.width)
+    );
+    this.backgroundService.changeBackgroundFromWave(this.wave.value);
   }
 }
