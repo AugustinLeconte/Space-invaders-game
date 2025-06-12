@@ -48,6 +48,7 @@ export class GameService {
       xp: 0,
       xpToNextLevel: this.xpService.calculateXpForLevel(2),
       image: this.imageService.loadImage('assets/space/player.png'),
+      shield: 100,
     });
     this.canvasService.initCanvas(canvas);
     this.keyService.initKeys();

@@ -1,3 +1,4 @@
+import { BossService } from '../services/boss.service';
 import { SpaceShip } from './entity.model';
 
 export interface Enemy extends SpaceShip {
@@ -5,6 +6,8 @@ export interface Enemy extends SpaceShip {
   canShoot: boolean;
   shootCooldown: number;
   lastShotTime: number;
+  missileSprite?: HTMLImageElement;
+  firePattern?: (boss: BossService) => void;
 }
 
 export const enemyTypes = [

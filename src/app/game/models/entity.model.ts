@@ -11,6 +11,7 @@ export interface SpaceShip extends Entity {
   maxHp: number;
   speed: number;
   experience: number;
+  shield: number;
 }
 
 export interface Player extends SpaceShip {

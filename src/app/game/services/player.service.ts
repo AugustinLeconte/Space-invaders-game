@@ -48,8 +48,17 @@ export class PlayerService {
     this.updatePlayer((p) => ({ ...p, y: p.y + pos }));
   }
 
+  private loseShield() {
+    this.updatePlayer((p) => ({ ...p, shield: (p.shield -= 1) }));
+  }
+
+  public gainShield() {
+    this.updatePlayer((p) => ({ ...p, shield: (p.shield += 1) }));
+  }
+
   public isHitted(damage: number) {
-    this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
+    if (this.player.value.shield >= 0) this.loseShield();
+    else this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
     if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
   }
 
