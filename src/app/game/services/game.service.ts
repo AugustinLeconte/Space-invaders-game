@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { Enemy } from '../models/enemy.model';
-import { Explosion } from '../models/explosion.model';
 import { Entity, Player } from '../models/entity.model';
-import { backgrounds } from '../constants/backgrounds.const';
 import { WaveService } from './wave.service';
 import { ImageService } from './image.service';
 import { XpService } from './xp.service';
@@ -13,15 +10,10 @@ import { KeysService } from './keys.service';
 import { CanvasService } from './canvas.service';
 import { EnemyService } from './enemy.service';
 import { ExplosionService } from './explosions.service';
+import { BackgroundService } from './background.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
-  private backgroundImage!: HTMLImageElement;
-  private nextBackgroundImage?: HTMLImageElement;
-  private backgroundAlpha = 1;
-  private transitioning = false;
-  private currentBackground: string = 'stage1';
-
   private lastFrameTime = performance.now();
 
   private playerSubscription!: Subscription;
@@ -41,26 +33,9 @@ export class GameService {
     private bulletService: BulletsService,
     private canvasService: CanvasService,
     private enemyService: EnemyService,
-    private explosionService: ExplosionService
+    private explosionService: ExplosionService,
+    private backgroundService: BackgroundService
   ) {}
-
-  loadBackground(imagePath: string) {
-    const img = new Image();
-    img.onload = () => {
-      this.nextBackgroundImage = img;
-      this.backgroundAlpha = 0;
-      this.transitioning = true;
-    };
-    img.src = imagePath;
-  }
-
-  updateScene(state: string) {
-    const newBg = backgrounds[`stage${state as '1' | '2' | '3' | '4'}`];
-    if (newBg && newBg !== this.currentBackground) {
-      this.loadBackground(newBg);
-      this.currentBackground = newBg;
-    }
-  }
 
   init(canvas: HTMLCanvasElement) {
     this.playerService.initPlayer({
@@ -85,7 +60,7 @@ export class GameService {
       this.player = player;
     });
 
-    this.updateScene('1');
+    this.backgroundService.updateScene('1');
     this.gameLoop();
   }
 
@@ -95,7 +70,7 @@ export class GameService {
 
     if (this.gamePaused.value == false && this.player.hp > 0) {
       this.update(deltaTime);
-      this.draw();
+      this.canvasService.draw();
     }
     this.pauseGestion();
     requestAnimationFrame(this.gameLoop);
@@ -119,40 +94,16 @@ export class GameService {
     this.bulletService.bulletMovement();
     this.enemyService.movement(this.canvasService.canvas.height);
     this.checkCollisions();
-    this.gestionExplosions(deltaTime);
+    this.explosionService.gestionExplosions(deltaTime);
     if (this.enemyService.isEmpty()) {
       this.waveService.nextWave();
       this.enemyService.addEnemies(
         this.waveService.spawnWave(this.canvasService.canvas.width)
       );
     }
-    if (
-      this.waveService.getNumberWave() >= 10 &&
-      this.waveService.getNumberWave() < 20
-    )
-      this.updateScene('2');
-    if (
-      this.waveService.getNumberWave() >= 20 &&
-      this.waveService.getNumberWave() < 30
-    )
-      this.updateScene('3');
-    if (
-      this.waveService.getNumberWave() >= 30 &&
-      this.waveService.getNumberWave() < 40
-    )
-      this.updateScene('4');
-  }
-
-  private gestionExplosions(deltaTime: number) {
-    const explosions = this.explosionService.getExplosions();
-    explosions.forEach((e) => {
-      e.frameTimer += deltaTime;
-      if (e.frameTimer >= e.frameInterval) {
-        e.frame++;
-        e.frameTimer = 0;
-      }
-    });
-    this.explosionService.filterExistingExplosions();
+    this.backgroundService.changeBackgroundFromWave(
+      this.waveService.getNumberWave()
+    );
   }
 
   private checkCollisions() {
@@ -185,60 +136,6 @@ export class GameService {
         this.enemyService.removeEnemy(enemy, i);
       }
     });
-  }
-
-  private draw() {
-    this.canvasService.ctx.clearRect(
-      0,
-      0,
-      this.canvasService.canvas.width,
-      this.canvasService.canvas.height
-    );
-
-    if (this.transitioning && this.nextBackgroundImage) {
-      this.canvasService.ctx.globalAlpha = 1 - this.backgroundAlpha;
-      if (this.backgroundImage) {
-        this.canvasService.ctx.drawImage(
-          this.backgroundImage,
-          0,
-          0,
-          this.canvasService.canvas.width,
-          this.canvasService.canvas.height
-        );
-      }
-
-      this.canvasService.ctx.globalAlpha = this.backgroundAlpha;
-      this.canvasService.ctx.drawImage(
-        this.nextBackgroundImage,
-        0,
-        0,
-        this.canvasService.canvas.width,
-        this.canvasService.canvas.height
-      );
-
-      this.canvasService.ctx.globalAlpha = 1;
-
-      this.backgroundAlpha += 0.02;
-
-      if (this.backgroundAlpha >= 1) {
-        this.backgroundImage = this.nextBackgroundImage!;
-        this.nextBackgroundImage = undefined;
-        this.transitioning = false;
-        this.backgroundAlpha = 1;
-      }
-    } else {
-      if (this.backgroundImage) {
-        this.canvasService.ctx.drawImage(
-          this.backgroundImage,
-          0,
-          0,
-          this.canvasService.canvas.width,
-          this.canvasService.canvas.height
-        );
-      }
-    }
-
-    this.canvasService.draw();
   }
 
   private isColliding(a: Entity, b: Entity): boolean {

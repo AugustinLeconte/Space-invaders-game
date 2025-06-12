@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Bullet } from '../models/entity.model';
-import { BehaviorSubject } from 'rxjs';
 import { ImageService } from './image.service';
 import { PlayerService } from './player.service';
 import { BulletsService } from './bullets.service';
 import { EnemyService } from './enemy.service';
 import { ExplosionService } from './explosions.service';
+import { BackgroundService } from './background.service';
 
 @Injectable({ providedIn: 'root' })
 export class CanvasService {
@@ -17,7 +16,8 @@ export class CanvasService {
     private playerService: PlayerService,
     private bulletService: BulletsService,
     private enemyService: EnemyService,
-    private explosionService: ExplosionService
+    private explosionService: ExplosionService,
+    private backgroundService: BackgroundService
   ) {}
 
   initCanvas(canvas: HTMLCanvasElement) {
@@ -39,50 +39,9 @@ export class CanvasService {
   }
 
   public draw() {
-    // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    /*if (this.transitioning && this.nextBackgroundImage) {
-      this.ctx.globalAlpha = 1 - this.backgroundAlpha;
-      if (this.backgroundImage) {
-        this.ctx.drawImage(
-          this.backgroundImage,
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
-        );
-      }
-
-      this.ctx.globalAlpha = this.backgroundAlpha;
-      this.ctx.drawImage(
-        this.nextBackgroundImage,
-        0,
-        0,
-        this.canvas.width,
-        this.canvas.height
-      );
-
-      this.ctx.globalAlpha = 1;
-
-      this.backgroundAlpha += 0.02;
-
-      if (this.backgroundAlpha >= 1) {
-        this.backgroundImage = this.nextBackgroundImage!;
-        this.nextBackgroundImage = undefined;
-        this.transitioning = false;
-        this.backgroundAlpha = 1;
-      }
-    } else {
-      if (this.backgroundImage) {
-        this.ctx.drawImage(
-          this.backgroundImage,
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
-        );
-      }
-    }*/
+    this.backgroundService.draw(this.ctx, this.canvas);
 
     const player = this.playerService.getPlayer();
     this.ctx.drawImage(

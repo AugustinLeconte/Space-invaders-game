@@ -16,4 +16,16 @@ export class ExplosionService {
   public filterExistingExplosions() {
     this.explosions = this.explosions.filter((e) => e.frame < e.totalFrames);
   }
+
+  public gestionExplosions(deltaTime: number) {
+    const explosions = this.getExplosions();
+    explosions.forEach((e) => {
+      e.frameTimer += deltaTime;
+      if (e.frameTimer >= e.frameInterval) {
+        e.frame++;
+        e.frameTimer = 0;
+      }
+    });
+    this.filterExistingExplosions();
+  }
 }
