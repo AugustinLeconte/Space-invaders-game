@@ -40,64 +40,10 @@ export class CanvasService {
 
   public draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     this.backgroundService.draw(this.ctx, this.canvas);
-
-    const player = this.playerService.getPlayer();
-    this.ctx.drawImage(
-      player.image,
-      player.x,
-      player.y,
-      player.width,
-      player.height
-    );
-
-    this.ctx.fillStyle = 'black';
-    this.ctx.fillRect(player.x, player.y - 6, player.width, 4);
-
-    this.ctx.fillStyle = 'lime';
-    this.ctx.fillRect(
-      player.x,
-      player.y - 6,
-      player.width * (player.hp / player.maxHp),
-      4
-    );
-
-    const explosions = this.explosionService.getExplosions();
-    explosions.forEach((e) => {
-      const col = e.frame;
-      this.ctx.drawImage(
-        e.sprite,
-        col * e.frameWidth,
-        0,
-        e.frameWidth,
-        e.frameHeight,
-        e.x,
-        e.y,
-        e.frameWidth,
-        e.frameHeight
-      );
-    });
-
-    const bullets = this.bulletService.getBullets();
-    bullets.forEach((b) =>
-      this.ctx.drawImage(b.image, b.x, b.y, b.width, b.height)
-    );
-
-    const enemyBullets = this.bulletService.getEnemyBullets();
-    enemyBullets.forEach((b) =>
-      this.ctx.drawImage(b.image, b.x, b.y, b.width, b.height)
-    );
-
-    const enemies = this.enemyService.getEnemies();
-    enemies.forEach((e) => {
-      this.ctx.drawImage(e.image, e.x, e.y, e.width, e.height);
-
-      this.ctx.fillStyle = 'black';
-      this.ctx.fillRect(e.x, e.y - 6, e.width, 4);
-
-      this.ctx.fillStyle = 'red';
-      this.ctx.fillRect(e.x, e.y - 6, e.width * (e.hp / e.maxHp), 4);
-    });
+    this.playerService.draw(this.ctx);
+    this.explosionService.draw(this.ctx);
+    this.bulletService.draw(this.ctx);
+    this.enemyService.draw(this.ctx);
   }
 }

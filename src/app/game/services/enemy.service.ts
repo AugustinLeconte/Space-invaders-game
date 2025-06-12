@@ -89,4 +89,16 @@ export class EnemyService {
   getEnemy(index: number): Enemy {
     return this.enemies[index];
   }
+
+  public draw(ctx: CanvasRenderingContext2D): void {
+    this.enemies.forEach((e) => {
+      ctx.drawImage(e.image, e.x, e.y, e.width, e.height);
+
+      ctx.fillStyle = 'black';
+      ctx.fillRect(e.x, e.y - 6, e.width, 4);
+
+      ctx.fillStyle = 'red';
+      ctx.fillRect(e.x, e.y - 6, e.width * (e.hp / e.maxHp), 4);
+    });
+  }
 }

@@ -28,4 +28,21 @@ export class ExplosionService {
     });
     this.filterExistingExplosions();
   }
+
+  public draw(ctx: CanvasRenderingContext2D): void {
+    this.explosions.forEach((e) => {
+      const col = e.frame;
+      ctx.drawImage(
+        e.sprite,
+        col * e.frameWidth,
+        0,
+        e.frameWidth,
+        e.frameHeight,
+        e.x,
+        e.y,
+        e.frameWidth,
+        e.frameHeight
+      );
+    });
+  }
 }

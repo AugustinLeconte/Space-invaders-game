@@ -37,4 +37,14 @@ export class BulletsService {
 
     this.enemyBullets.forEach((b) => (b.y += 4));
   }
+
+  public draw(ctx: CanvasRenderingContext2D): void {
+    this.bullets.forEach((b) =>
+      ctx.drawImage(b.image, b.x, b.y, b.width, b.height)
+    );
+
+    this.enemyBullets.forEach((b) =>
+      ctx.drawImage(b.image, b.x, b.y, b.width, b.height)
+    );
+  }
 }

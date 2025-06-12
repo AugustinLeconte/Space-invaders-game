@@ -52,4 +52,31 @@ export class PlayerService {
     this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
     if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
   }
+
+  public draw(ctx: CanvasRenderingContext2D): void {
+    ctx.drawImage(
+      this.player.value.image,
+      this.player.value.x,
+      this.player.value.y,
+      this.player.value.width,
+      this.player.value.height
+    );
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(
+      this.player.value.x,
+      this.player.value.y - 6,
+      this.player.value.width,
+      4
+    );
+
+    ctx.fillStyle = 'lime';
+    ctx.fillRect(
+      this.player.value.x,
+      this.player.value.y - 6,
+      this.player.value.width *
+        (this.player.value.hp / this.player.value.maxHp),
+      4
+    );
+  }
 }
