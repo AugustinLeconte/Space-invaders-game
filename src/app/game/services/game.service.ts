@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { Enemy } from '../models/enemy.model';
 import { Explosion } from '../models/explosion.model';
-import { Bullet, Entity, Player } from '../models/entity.model';
+import { Entity, Player } from '../models/entity.model';
 import { backgrounds } from '../constants/backgrounds.const';
 import { WaveService } from './wave.service';
 import { ImageService } from './image.service';
@@ -11,6 +11,8 @@ import { PlayerService } from './player.service';
 import { BulletsService } from './bullets.service';
 import { KeysService } from './keys.service';
 import { CanvasService } from './canvas.service';
+import { EnemyService } from './enemy.service';
+import { ExplosionService } from './explosions.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -20,13 +22,10 @@ export class GameService {
   private transitioning = false;
   private currentBackground: string = 'stage1';
 
-  private explosionSprite!: HTMLImageElement;
-  private explosions: Explosion[] = [];
   private lastFrameTime = performance.now();
 
   private playerSubscription!: Subscription;
   private player!: Player;
-  private enemies: Enemy[] = [];
 
   private keys: Record<string, boolean> = {};
   private gamePaused = new BehaviorSubject<boolean>(false);
@@ -40,7 +39,9 @@ export class GameService {
     private playerService: PlayerService,
     private keyService: KeysService,
     private bulletService: BulletsService,
-    private canvasService: CanvasService
+    private canvasService: CanvasService,
+    private enemyService: EnemyService,
+    private explosionService: ExplosionService
   ) {}
 
   loadBackground(imagePath: string) {
@@ -80,10 +81,6 @@ export class GameService {
     this.keyService.initKeys();
     this.imageService.initImages();
 
-    this.explosionSprite = this.imageService.loadImage(
-      'assets/space/explosion.png'
-    );
-
     this.playerSubscription = this.playerService.player$.subscribe((player) => {
       this.player = player;
     });
@@ -118,31 +115,15 @@ export class GameService {
   private update(deltaTime: number) {
     this.keyService.playerMovements();
     this.keyService.shootGestion();
-    this.enemies.forEach((e) => {
-      if (e.canShoot) {
-        const now = Date.now();
-        if (now - e.lastShotTime > e.shootCooldown) {
-          this.bulletService.addEnemyBullet({
-            x: e.x + e.width / 2 - 2,
-            y: e.y + e.height,
-            width: 4,
-            height: 10,
-            image: this.imageService.enemyBulletImage,
-            damage: 10,
-            velocity: 10,
-          });
-          e.lastShotTime = now;
-        }
-      }
-    });
+    this.enemyService.shoots();
     this.bulletService.bulletMovement();
-    this.enemiesMovement();
+    this.enemyService.movement(this.canvasService.canvas.height);
     this.checkCollisions();
     this.gestionExplosions(deltaTime);
-    if (this.enemies.length == 0) {
+    if (this.enemyService.isEmpty()) {
       this.waveService.nextWave();
-      this.enemies = this.waveService.spawnWave(
-        this.canvasService.canvas.width
+      this.enemyService.addEnemies(
+        this.waveService.spawnWave(this.canvasService.canvas.width)
       );
     }
     if (
@@ -163,35 +144,27 @@ export class GameService {
   }
 
   private gestionExplosions(deltaTime: number) {
-    this.explosions.forEach((e) => {
+    const explosions = this.explosionService.getExplosions();
+    explosions.forEach((e) => {
       e.frameTimer += deltaTime;
       if (e.frameTimer >= e.frameInterval) {
         e.frame++;
         e.frameTimer = 0;
       }
     });
-
-    this.explosions = this.explosions.filter((e) => e.frame < e.totalFrames);
-  }
-
-  private enemiesMovement() {
-    this.enemies.forEach((e, j) => {
-      e.y += e.speed;
-      if (e.y >= this.canvasService.canvas.height) {
-        this.enemies.splice(j, 1);
-        this.player.hp -= 20;
-      }
-    });
+    this.explosionService.filterExistingExplosions();
   }
 
   private checkCollisions() {
+    let enemies = this.enemyService.getEnemies();
     const bullets = this.bulletService.getBullets();
     bullets.forEach((bullet, i) => {
-      this.enemies.forEach((enemy, j) => {
+      enemies.forEach((enemy, j) => {
         if (this.isColliding(bullet, enemy)) {
-          this.enemies[j].hp -= bullet.damage;
+          this.enemyService.takeDamage(j, bullet.damage);
           this.bulletService.removeBullet(i);
-          if (this.enemies[j].hp <= 0) this.removeEnemy(enemy, j);
+          if (this.enemyService.getEnemy(j).hp <= 0)
+            this.enemyService.removeEnemy(enemy, j);
         }
       });
     });
@@ -199,40 +172,19 @@ export class GameService {
     const enemyBullets = this.bulletService.getEnemyBullets();
     enemyBullets.forEach((bullet, i) => {
       if (this.isColliding(bullet, this.player)) {
-        this.player.hp -= bullet.damage;
+        this.playerService.isHitted(bullet.damage);
         this.bulletService.removeEnemyBullet(i);
       }
     });
 
-    this.enemies.forEach((enemy, i) => {
+    enemies = this.enemyService.getEnemies();
+    enemies.forEach((enemy, i) => {
       if (this.isColliding(enemy, this.player)) {
-        this.player.hp -= 20;
-        this.removeEnemy(enemy, i);
+        this.playerService.isHitted(20);
+
+        this.enemyService.removeEnemy(enemy, i);
       }
     });
-
-    if (this.player.hp < 0) this.player.hp = 0;
-  }
-
-  private removeEnemy(enemy: Enemy, index: number) {
-    this.enemies.splice(index, 1);
-
-    const frameWidth = 87.5;
-    const frameHeight = 128;
-
-    this.explosions.push({
-      x: enemy.x + enemy.width / 2 - frameWidth / 2,
-      y: enemy.y + enemy.height / 2 - frameHeight / 2,
-      frame: 0,
-      totalFrames: 7,
-      sprite: this.explosionSprite,
-      frameWidth,
-      frameHeight,
-      frameTimer: 0,
-      frameInterval: 100,
-    });
-
-    this.xpService.gainXp(enemy.experience);
   }
 
   private draw() {
@@ -287,36 +239,6 @@ export class GameService {
     }
 
     this.canvasService.draw();
-
-    this.explosions.forEach((e) => {
-      const col = e.frame;
-      this.canvasService.ctx.drawImage(
-        e.sprite,
-        col * e.frameWidth,
-        0,
-        e.frameWidth,
-        e.frameHeight,
-        e.x,
-        e.y,
-        e.frameWidth,
-        e.frameHeight
-      );
-    });
-
-    this.enemies.forEach((e) => {
-      this.canvasService.ctx.drawImage(e.image, e.x, e.y, e.width, e.height);
-
-      this.canvasService.ctx.fillStyle = 'black';
-      this.canvasService.ctx.fillRect(e.x, e.y - 6, e.width, 4);
-
-      this.canvasService.ctx.fillStyle = 'red';
-      this.canvasService.ctx.fillRect(
-        e.x,
-        e.y - 6,
-        e.width * (e.hp / e.maxHp),
-        4
-      );
-    });
   }
 
   private isColliding(a: Entity, b: Entity): boolean {

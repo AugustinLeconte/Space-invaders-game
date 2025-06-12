@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { WaveService } from '../../services/wave.service';
 import { Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-wave',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './wave.component.html',
   styleUrl: './wave.component.scss',
 })
 export class WaveComponent {
   private waveSubscription!: Subscription;
-  wave: number = 0;
+  wave: number = 1;
 
   constructor(public waveService: WaveService) {}
 

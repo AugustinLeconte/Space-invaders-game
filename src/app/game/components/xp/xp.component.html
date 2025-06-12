@@ -1,6 +1,8 @@
-<div class="level">Lvl {{ level }}</div>
-<progress
-  class="progress"
-  value="{{ xp }}"
-  max="{{ xpToNextLevel }}"
-></progress>
+<div *ngIf="level">
+  <div class="level">Lvl {{ level }}</div>
+  <progress
+    class="progress"
+    value="{{ xp }}"
+    max="{{ xpToNextLevel }}"
+  ></progress>
+</div>

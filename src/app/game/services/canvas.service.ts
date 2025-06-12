@@ -4,6 +4,8 @@ import { BehaviorSubject } from 'rxjs';
 import { ImageService } from './image.service';
 import { PlayerService } from './player.service';
 import { BulletsService } from './bullets.service';
+import { EnemyService } from './enemy.service';
+import { ExplosionService } from './explosions.service';
 
 @Injectable({ providedIn: 'root' })
 export class CanvasService {
@@ -13,7 +15,9 @@ export class CanvasService {
   constructor(
     private imageService: ImageService,
     private playerService: PlayerService,
-    private bulletService: BulletsService
+    private bulletService: BulletsService,
+    private enemyService: EnemyService,
+    private explosionService: ExplosionService
   ) {}
 
   initCanvas(canvas: HTMLCanvasElement) {
@@ -100,7 +104,8 @@ export class CanvasService {
       4
     );
 
-    /*this.explosions.forEach((e) => {
+    const explosions = this.explosionService.getExplosions();
+    explosions.forEach((e) => {
       const col = e.frame;
       this.ctx.drawImage(
         e.sprite,
@@ -113,7 +118,7 @@ export class CanvasService {
         e.frameWidth,
         e.frameHeight
       );
-    });*/
+    });
 
     const bullets = this.bulletService.getBullets();
     bullets.forEach((b) =>
@@ -125,7 +130,8 @@ export class CanvasService {
       this.ctx.drawImage(b.image, b.x, b.y, b.width, b.height)
     );
 
-    /*this.enemies.forEach((e) => {
+    const enemies = this.enemyService.getEnemies();
+    enemies.forEach((e) => {
       this.ctx.drawImage(e.image, e.x, e.y, e.width, e.height);
 
       this.ctx.fillStyle = 'black';
@@ -133,6 +139,6 @@ export class CanvasService {
 
       this.ctx.fillStyle = 'red';
       this.ctx.fillRect(e.x, e.y - 6, e.width * (e.hp / e.maxHp), 4);
-    });*/
+    });
   }
 }

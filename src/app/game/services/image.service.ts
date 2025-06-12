@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 export class ImageService {
   public bulletImage!: HTMLImageElement;
   public enemyBulletImage!: HTMLImageElement;
+  public explosionSprite!: HTMLImageElement;
 
   public loadImage = (src: string) => {
     const img = new Image();
@@ -14,5 +15,6 @@ export class ImageService {
   public initImages() {
     this.enemyBulletImage = this.loadImage('assets/space/enemyBullet.png');
     this.bulletImage = this.loadImage('assets/space/bullet.png');
+    this.explosionSprite = this.loadImage('assets/space/explosion.png');
   }
 }

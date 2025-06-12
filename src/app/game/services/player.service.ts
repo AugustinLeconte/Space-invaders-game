@@ -47,4 +47,9 @@ export class PlayerService {
   public setPlayerPositionY(pos: number): void {
     this.updatePlayer((p) => ({ ...p, y: p.y + pos }));
   }
+
+  public isHitted(damage: number) {
+    this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
+    if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
+  }
 }

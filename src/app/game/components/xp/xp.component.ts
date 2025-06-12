@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PlayerService } from '../../services/player.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-xp',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './xp.component.html',
   styleUrl: './xp.component.scss',
 })
