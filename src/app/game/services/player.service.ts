@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Player } from '../models/entity.model';
+import { Bullet, Player } from '../models/entity.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
@@ -48,16 +48,35 @@ export class PlayerService {
     this.updatePlayer((p) => ({ ...p, y: p.y + pos }));
   }
 
-  private loseShield() {
+  private loseShield(): void {
     this.updatePlayer((p) => ({ ...p, shield: (p.shield -= 1) }));
+    if (this.player.value.shield < 0)
+      this.updatePlayer((p) => ({ ...p, shield: 0 }));
   }
 
-  public gainShield() {
-    this.updatePlayer((p) => ({ ...p, shield: (p.shield += 1) }));
+  public gainShield(): void {
+    if (this.player.value.shield + 1 <= this.player.value.maxShield)
+      this.updatePlayer((p) => ({ ...p, shield: (p.shield += 1) }));
   }
 
-  public isHitted(damage: number) {
-    if (this.player.value.shield >= 0) this.loseShield();
+  public gainMissile(): void {
+    if (this.player.value.missiles + 1 <= this.player.value.maxMissiles)
+      this.updatePlayer((p) => ({ ...p, missiles: (p.missiles += 1) }));
+  }
+
+  /* public launchMissile(): Bullet {
+    this.updatePlayer((p) => ({ ...p, missiles: (p.missiles -= 1) }));
+    return null;
+  }*/
+
+  public heal(heal: number): void {
+    this.updatePlayer((p) => ({ ...p, hp: p.hp + heal }));
+    if (this.player.value.hp > this.player.value.maxHp)
+      this.updatePlayer((p) => ({ ...p, hp: p.maxHp }));
+  }
+
+  public isHitted(damage: number): void {
+    if (this.player.value.shield > 0) this.loseShield();
     else this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
     if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
   }

@@ -18,6 +18,9 @@ export interface Player extends SpaceShip {
   level: number;
   xp: number;
   xpToNextLevel: number;
+  missiles: number;
+  maxMissiles: number;
+  maxShield: number;
 }
 
 export interface Bullet extends Entity {

@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageService } from './image.service';
+import { Entity, Player } from '../models/entity.model';
+import { PlayerService } from './player.service';
 
-export interface PowerUp {
+export interface PowerUp extends Entity {
   id: string;
-  x: number;
-  y: number;
-  image: HTMLImageElement;
   type: 'heal' | 'speed' | 'damage' | 'shield' | 'missile';
   duration?: number;
 }
@@ -17,10 +16,8 @@ export interface PowerUp {
 })
 export class PowerUpService {
   private powerUps: PowerUp[] = [];
-  private powerUpsSubject = new BehaviorSubject<PowerUp[]>([]);
-  public powerUps$ = this.powerUpsSubject.asObservable();
 
-  private dropChance = 0.2;
+  private dropChance = 1;
   private readonly powerUpImages: Record<PowerUp['type'], string> = {
     heal: 'assets/space/power-ups/HP_Bonus.png',
     speed: 'assets/space/power-ups/Enemy_Speed_Debuff.png',
@@ -29,7 +26,10 @@ export class PowerUpService {
     missile: 'assets/space/power-ups/Rockets_Bonus.png',
   };
 
-  constructor(private imageService: ImageService) {}
+  constructor(
+    private imageService: ImageService,
+    private playerService: PlayerService
+  ) {}
 
   public trySpawnPowerUp(x: number, y: number): void {
     if (Math.random() <= this.dropChance) {
@@ -39,18 +39,32 @@ export class PowerUpService {
         x,
         y,
         type: type,
+        width: 32,
+        height: 32,
         image: this.imageService.loadImage(this.getImageForType(type)),
       };
       this.powerUps.push(newPowerUp);
-      this.emit();
     }
   }
 
   public collectPowerUp(id: string): PowerUp | undefined {
     const index = this.powerUps.findIndex((p) => p.id === id);
     if (index >= 0) {
+      switch (this.powerUps[index].type) {
+        case 'shield':
+          this.playerService.gainShield();
+          break;
+        case 'heal':
+          this.playerService.heal(10);
+          break;
+        case 'missile':
+          this.playerService.gainMissile();
+          break;
+        default:
+          break;
+      }
+
       const [collected] = this.powerUps.splice(index, 1);
-      this.emit();
       return collected;
     }
     return undefined;
@@ -72,13 +86,13 @@ export class PowerUpService {
     return this.powerUpImages[type];
   }
 
-  private emit() {
-    this.powerUpsSubject.next([...this.powerUps]);
+  public getPowerUps(): PowerUp[] {
+    return this.powerUps;
   }
 
   public draw(ctx: CanvasRenderingContext2D) {
     this.powerUps.forEach((p) => {
-      ctx.drawImage(p.image, p.x, p.y, 64, 64);
+      ctx.drawImage(p.image, p.x, p.y, p.width, p.height);
     });
   }
 }

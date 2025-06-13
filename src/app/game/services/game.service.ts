@@ -12,6 +12,7 @@ import { EnemyService } from './enemy.service';
 import { ExplosionService } from './explosions.service';
 import { BackgroundService } from './background.service';
 import { GameStateService } from './gameState.service';
+import { PowerUpService } from './powerUps.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -31,7 +32,8 @@ export class GameService {
     private enemyService: EnemyService,
     private explosionService: ExplosionService,
     private backgroundService: BackgroundService,
-    private gameStateService: GameStateService
+    private gameStateService: GameStateService,
+    private powerUpService: PowerUpService
   ) {}
 
   init(canvas: HTMLCanvasElement) {
@@ -49,6 +51,9 @@ export class GameService {
       xpToNextLevel: this.xpService.calculateXpForLevel(2),
       image: this.imageService.loadImage('assets/space/player.png'),
       shield: 3,
+      missiles: 0,
+      maxMissiles: 3,
+      maxShield: 3,
     });
     this.canvasService.initCanvas(canvas);
     this.keyService.initKeys();
@@ -110,8 +115,14 @@ export class GameService {
     enemies.forEach((enemy, i) => {
       if (this.isColliding(enemy, this.player)) {
         this.playerService.isHitted(20);
-
         this.enemyService.removeEnemy(enemy, i);
+      }
+    });
+
+    const pU = this.powerUpService.getPowerUps();
+    pU.forEach((pu) => {
+      if (this.isColliding(pu, this.player)) {
+        this.powerUpService.collectPowerUp(pu.id);
       }
     });
   }

@@ -1,3 +1,10 @@
-<div *ngFor="let powerUp of powerUps">
-  {{ powerUp.type }}
+<div class="pu-missile">
+  <p *ngFor="let _ of getArray(missiles)">
+    <img src="assets/space/power-ups/Rockets_Bonus.png" />
+  </p>
+</div>
+<div class="pu-shield">
+  <p *ngFor="let _ of getArray(shield)">
+    <img src="assets/space/power-ups/Armor_Bonus.png" />
+  </p>
 </div>
