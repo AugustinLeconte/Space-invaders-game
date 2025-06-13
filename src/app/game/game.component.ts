@@ -6,10 +6,17 @@ import { XpComponent } from './components/xp/xp.component';
 import { GameStateService } from './services/gameState.service';
 import { GameService } from './services/game.service';
 import { PowerUpsComponent } from './components/power-ups/power-ups.component';
+import { JoystickComponent } from './components/joystick/joystick.component';
 
 @Component({
   selector: 'app-game',
-  imports: [CommonModule, WaveComponent, XpComponent, PowerUpsComponent],
+  imports: [
+    CommonModule,
+    WaveComponent,
+    XpComponent,
+    PowerUpsComponent,
+    JoystickComponent,
+  ],
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })

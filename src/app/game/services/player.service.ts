@@ -83,6 +83,7 @@ export class PlayerService {
     else this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
     if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
   }
+
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.drawImage(
       this.player.value.image,

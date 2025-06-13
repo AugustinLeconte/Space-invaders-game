@@ -52,6 +52,27 @@ export class KeysService {
       this.playerService.setPlayerPositionY(5);
   }
 
+  public movePlayerByJoystick(direction: string) {
+    const player = this.playerService.getPlayer();
+
+    switch (direction) {
+      case 'left':
+        if (player.x - 5 >= 0) this.playerService.setPlayerPositionX(-5);
+        break;
+      case 'right':
+        if (player.x + 5 < this.canvasService.canvas.width - player.width)
+          this.playerService.setPlayerPositionX(5);
+        break;
+      case 'up':
+        if (player.y - 5 >= 0) this.playerService.setPlayerPositionY(-5);
+        break;
+      case 'down':
+        if (player.y + 5 < this.canvasService.canvas.height - player.height)
+          this.playerService.setPlayerPositionY(5);
+        break;
+    }
+  }
+
   private shootMissileGestion() {
     const player = this.playerService.getPlayer();
     if (this.keys['f']) {
