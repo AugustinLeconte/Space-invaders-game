@@ -1,3 +1,5 @@
+import { Enemy } from './enemy.model';
+
 export interface Entity {
   x: number;
   y: number;
@@ -26,4 +28,11 @@ export interface Player extends SpaceShip {
 export interface Bullet extends Entity {
   damage: number;
   velocity: number;
+}
+
+export interface Missile extends Bullet {
+  id: string;
+  speed: number;
+  target: Enemy;
+  radius: number;
 }

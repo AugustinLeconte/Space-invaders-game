@@ -64,10 +64,13 @@ export class PlayerService {
       this.updatePlayer((p) => ({ ...p, missiles: (p.missiles += 1) }));
   }
 
-  /* public launchMissile(): Bullet {
+  public launchMissile(): void {
     this.updatePlayer((p) => ({ ...p, missiles: (p.missiles -= 1) }));
-    return null;
-  }*/
+  }
+
+  public missileNumber(): number {
+    return this.player.value.missiles;
+  }
 
   public heal(heal: number): void {
     this.updatePlayer((p) => ({ ...p, hp: p.hp + heal }));
@@ -80,7 +83,6 @@ export class PlayerService {
     else this.updatePlayer((p) => ({ ...p, hp: p.hp - damage }));
     if (this.player.value.hp < 0) this.updatePlayer((p) => ({ ...p, hp: 0 }));
   }
-
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.drawImage(
       this.player.value.image,

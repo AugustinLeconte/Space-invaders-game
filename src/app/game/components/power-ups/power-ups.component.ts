@@ -21,9 +21,6 @@ export class PowerUpsComponent {
   ngOnInit(): void {
     this.powerUpSubscription = this.playerService.player$.subscribe(
       (player) => {
-        console.log(player.shield);
-        console.log(player.missiles);
-        console.log('-------------------');
         this.shield = player.shield;
         this.missiles = player.missiles;
       }

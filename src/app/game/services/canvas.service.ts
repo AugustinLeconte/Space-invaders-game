@@ -6,6 +6,7 @@ import { EnemyService } from './enemy.service';
 import { ExplosionService } from './explosions.service';
 import { BackgroundService } from './background.service';
 import { PowerUpService } from './powerUps.service';
+import { MissileService } from './missile.service';
 
 @Injectable({ providedIn: 'root' })
 export class CanvasService {
@@ -19,7 +20,8 @@ export class CanvasService {
     private enemyService: EnemyService,
     private explosionService: ExplosionService,
     private backgroundService: BackgroundService,
-    private powerUpService: PowerUpService
+    private powerUpService: PowerUpService,
+    private missileService: MissileService
   ) {}
 
   initCanvas(canvas: HTMLCanvasElement) {
@@ -48,5 +50,6 @@ export class CanvasService {
     this.bulletService.draw(this.ctx);
     this.enemyService.draw(this.ctx);
     this.powerUpService.draw(this.ctx);
+    this.missileService.draw(this.ctx);
   }
 }

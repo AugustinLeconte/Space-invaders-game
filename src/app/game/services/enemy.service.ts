@@ -84,6 +84,8 @@ export class EnemyService {
 
   public takeDamage(index: number, damage: number): void {
     this.enemies[index].hp -= damage;
+    if (this.enemies[index].hp <= 0)
+      this.removeEnemy(this.enemies[index], index);
   }
 
   public getEnemies(): Enemy[] {
@@ -92,6 +94,23 @@ export class EnemyService {
 
   getEnemy(index: number): Enemy {
     return this.enemies[index];
+  }
+
+  public getClosestEnemy(x: number, y: number): Enemy | null {
+    let closest: Enemy | null = null;
+    let minDist = Infinity;
+
+    for (const enemy of this.enemies) {
+      const dx = enemy.x - x;
+      const dy = enemy.y - y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = enemy;
+      }
+    }
+
+    return closest;
   }
 
   public draw(ctx: CanvasRenderingContext2D): void {

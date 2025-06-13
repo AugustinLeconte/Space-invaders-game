@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageService } from './image.service';
-import { Entity, Player } from '../models/entity.model';
+import { Entity } from '../models/entity.model';
 import { PlayerService } from './player.service';
 
 export interface PowerUp extends Entity {
@@ -17,7 +16,7 @@ export interface PowerUp extends Entity {
 export class PowerUpService {
   private powerUps: PowerUp[] = [];
 
-  private dropChance = 1;
+  private dropChance = 0.25;
   private readonly powerUpImages: Record<PowerUp['type'], string> = {
     heal: 'assets/space/power-ups/HP_Bonus.png',
     speed: 'assets/space/power-ups/Enemy_Speed_Debuff.png',

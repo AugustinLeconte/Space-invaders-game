@@ -4,19 +4,23 @@ import { CanvasService } from './canvas.service';
 import { ImageService } from './image.service';
 import { BulletsService } from './bullets.service';
 import { GameStateService } from './gameState.service';
+import { MissileService } from './missile.service';
 
 @Injectable({ providedIn: 'root' })
 export class KeysService {
   private keys: Record<string, boolean> = {};
-  private keyLockP = false;
-  private keyLockShoot = false;
+  private keyLockPause = false;
+  private keyLockShootMissile = false;
+  private lastShotTime: number = 0;
+  private shootCooldown: number = 400 + Math.random() * 400;
 
   constructor(
     private playerService: PlayerService,
     private canvasService: CanvasService,
     private imageService: ImageService,
     private bulletService: BulletsService,
-    private gameStateService: GameStateService
+    private gameStateService: GameStateService,
+    private missileService: MissileService
   ) {}
 
   public initKeys() {
@@ -27,6 +31,7 @@ export class KeysService {
   public keyGestion() {
     this.playerMovements();
     this.shootGestion();
+    this.shootMissileGestion();
   }
 
   private playerMovements() {
@@ -47,34 +52,50 @@ export class KeysService {
       this.playerService.setPlayerPositionY(5);
   }
 
-  private shootGestion() {
+  private shootMissileGestion() {
     const player = this.playerService.getPlayer();
-    if (this.keys[' ']) {
-      if (!this.keyLockShoot) {
-        this.bulletService.addBullet({
-          x: player.x + player.width / 2 - 2,
-          y: player.y,
-          width: 4,
-          height: 10,
-          image: this.imageService.bulletImage,
-          damage: 10,
-          velocity: 10,
-        });
-        this.keyLockShoot = true;
+    if (this.keys['f']) {
+      if (!this.keyLockShootMissile && this.playerService.missileNumber() > 0) {
+        this.missileService.launchMissile(
+          player.x + player.width / 2 - 2,
+          player.y,
+          5,
+          50
+        );
+        this.playerService.launchMissile();
+        this.keyLockShootMissile = true;
       }
     } else {
-      this.keyLockShoot = false;
+      this.keyLockShootMissile = false;
+    }
+  }
+
+  private shootGestion() {
+    const player = this.playerService.getPlayer();
+    const now = Date.now();
+
+    if (now - this.lastShotTime > this.shootCooldown) {
+      this.bulletService.addBullet({
+        x: player.x + player.width / 2 - 2,
+        y: player.y,
+        width: 4,
+        height: 10,
+        image: this.imageService.bulletImage,
+        damage: 10,
+        velocity: 10,
+      });
+      this.lastShotTime = now;
     }
   }
 
   public pauseGestion() {
-    if (this.keys['p']) {
-      if (!this.keyLockP) {
+    if (this.keys[' ']) {
+      if (!this.keyLockPause) {
         this.gameStateService.paused();
-        this.keyLockP = true;
+        this.keyLockPause = true;
       }
     } else {
-      this.keyLockP = false;
+      this.keyLockPause = false;
     }
   }
 }
