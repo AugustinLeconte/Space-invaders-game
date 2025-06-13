@@ -22,8 +22,8 @@ export class MissileService {
       id: uuidv4(),
       x,
       y,
-      width: 32,
-      height: 32,
+      width: 64,
+      height: 64,
       image: this.imageService.loadImage(
         'assets/space/bullets/Missile/Missile_1_Explosion_000.png'
       ),
@@ -32,16 +32,22 @@ export class MissileService {
       radius,
       damage,
       velocity: 10,
+      angle: 0,
     };
 
     this.missiles.push(missile);
   }
 
-  updateMissiles() {
+  public updateMissiles() {
     const updatedMissiles = this.missiles
       .map((missile) => {
-        const dx = missile.target.x - missile.x;
-        const dy = missile.target.y - missile.y;
+        const targetCenterX = missile.target.x + missile.target.width / 2;
+        const targetCenterY = missile.target.y + missile.target.height / 2;
+        const missileCenterX = missile.x;
+        const missileCenterY = missile.y;
+
+        const dx = targetCenterX - missileCenterX;
+        const dy = targetCenterY - missileCenterY;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance < 5) {
@@ -51,8 +57,14 @@ export class MissileService {
 
         const vx = (dx / distance) * missile.speed;
         const vy = (dy / distance) * missile.speed;
+        const angle = Math.atan2(dy, dx);
 
-        return { ...missile, x: missile.x + vx, y: missile.y + vy };
+        return {
+          ...missile,
+          x: missile.x + vx,
+          y: missile.y + vy,
+          angle,
+        };
       })
       .filter((m): m is Missile => m !== null);
 
@@ -73,7 +85,11 @@ export class MissileService {
 
   public draw(ctx: CanvasRenderingContext2D): void {
     this.missiles.forEach((m) => {
-      ctx.drawImage(m.image, m.x, m.y, m.width, m.height);
+      ctx.save();
+      ctx.translate(m.x, m.y);
+      ctx.rotate(m.angle);
+      ctx.drawImage(m.image, -m.width / 2, -m.height / 2, m.width, m.height);
+      ctx.restore();
     });
   }
 }

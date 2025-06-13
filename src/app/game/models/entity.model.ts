@@ -35,4 +35,5 @@ export interface Missile extends Bullet {
   speed: number;
   target: Enemy;
   radius: number;
+  angle: number;
 }
