@@ -34,7 +34,7 @@ export class GameComponent implements AfterViewInit {
   ngOnInit(): void {
     this.gamePausedSubscription = this.gameStateService.gamePaused$.subscribe(
       (paused) => {
-        this.isPaused = paused;
+        this.isPaused = paused === 'pause';
       }
     );
   }

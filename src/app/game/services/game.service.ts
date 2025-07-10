@@ -73,7 +73,7 @@ export class GameService {
     const deltaTime = now - this.lastFrameTime;
     this.lastFrameTime = now;
 
-    if (!this.gameStateService.isPaused() && this.player.hp > 0) {
+    if (this.gameStateService.state() === 'play' && this.player.hp > 0) {
       this.update(deltaTime);
       this.canvasService.draw();
     }

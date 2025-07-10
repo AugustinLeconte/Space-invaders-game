@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core';
 import { PlayerService } from './player.service';
+import { GameStateService } from './gameState.service';
+import { AugmentsService } from './augments.service';
 
 @Injectable({ providedIn: 'root' })
 export class XpService {
-  constructor(private playerService: PlayerService) {}
+  constructor(
+    private playerService: PlayerService,
+    private gameStateService: GameStateService,
+    private augmentService: AugmentsService
+  ) {}
 
   public calculateXpForLevel(level: number): number {
     return Math.floor(100 * Math.pow(1.2, level - 1));
@@ -25,5 +31,7 @@ export class XpService {
 
   public onLevelUp(): void {
     this.playerService.increaseMaxHp(20);
+    this.gameStateService.setGameState('augmentSelection');
+    this.augmentService.proposeAugments();
   }
 }

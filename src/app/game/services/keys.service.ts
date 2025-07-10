@@ -112,7 +112,11 @@ export class KeysService {
   public pauseGestion() {
     if (this.keys[' ']) {
       if (!this.keyLockPause) {
-        this.gameStateService.paused();
+        const gameStateValue = this.gameStateService.state();
+        if (gameStateValue == 'play')
+          this.gameStateService.setGameState('pause');
+        else if (gameStateValue == 'pause')
+          this.gameStateService.setGameState('play');
         this.keyLockPause = true;
       }
     } else {
